@@ -71,6 +71,15 @@ ipcMain.on("appointment:request:list", event => {
 
 });
 
+ipcMain.on("appointment:request:today", event => {
+    console.log("here2");
+
+});
+
+ipcMain.on("appointment:done", (event, id) => {
+    console.log("here3");
+});
+
 const menuTemplate = [{
         label: "file",
         submenu: [{
