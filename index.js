@@ -39,7 +39,7 @@ const listWindowCreator = () => {
         webPreferences: {
             nodeIntegration: true
         },
-        widht: 600,
+        width: 600,
         height: 400,
         title: "All Appointments"
     });
@@ -54,7 +54,7 @@ const createWindowCreator = () => {
         webPreferences: {
             nodeIntegration: true
         },
-        widht: 600,
+        width: 600,
         height: 400,
         title: "Create Appointments"
     });
@@ -73,17 +73,12 @@ ipcMain.on("appointment:create", (event, appointment) => {
 
     console.log(allAppointment);
 });
-
 ipcMain.on("appointment:request:list", event => {
-    console.log("here");
-
+    listWindow.webContents.send('appointment:response:list', allAppointment);
 });
-
 ipcMain.on("appointment:request:today", event => {
     console.log("here2");
-
 });
-
 ipcMain.on("appointment:done", (event, id) => {
     console.log("here3");
 });
