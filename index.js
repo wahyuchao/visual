@@ -16,7 +16,7 @@ let listWindow;
 let allAppointment = [];
 
 fs.readFile("db.json", (err, jsonAppointments) => {
-    if(!err){
+    if (!err) {
         const oldAppointment = JSON.parse(jsonAppointments);
         allAppointment = oldAppointment;
     }
@@ -36,7 +36,7 @@ app.on("ready", () => {
         const jsonAppointment = JSON.stringify(allAppointment);
         fs.writeFileSync("db.json", jsonAppointment);
 
-        app.quit()
+        app.quit();
         todayWindow = null;
     });
 
