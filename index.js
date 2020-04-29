@@ -1,5 +1,6 @@
 const electron = require("electron");
 const uuid = require("uuid").v4;
+const fs = require("fs");
 
 const {
     app,
@@ -14,6 +15,13 @@ let listWindow;
 
 let allAppointment = [];
 
+fs.readFile("db.json", (err, jsonAppointments) => {
+    if(!err){
+        const oldAppointment = JSON.parse(jsonAppointments);
+        allAppointment = oldAppointment;
+    }
+})
+
 app.on("ready", () => {
     todayWindow = new BrowserWindow({
         webPreferences: {
@@ -24,6 +32,9 @@ app.on("ready", () => {
 
     todayWindow.loadURL(`file://${__dirname}/today.html`);
     todayWindow.on("closed", () => {
+
+        const jsonAppointment = JSON.stringify(allAppointment);
+        fs.writeFileSync("db.json", jsonAppointment);
 
         app.quit()
         todayWindow = null;
@@ -68,20 +79,32 @@ ipcMain.on("appointment:create", (event, appointment) => {
     appointment["id"] = uuid();
     appointment["done"] = 0;
     allAppointment.push(appointment);
-
+    sendTodayAppointments();
     createWindow.close();
 
     console.log(allAppointment);
 });
 ipcMain.on("appointment:request:list", event => {
-    listWindow.webContents.send('appointment:response:list', allAppointment);
+    listWindow.webContents.send("appointment:response:list", allAppointment);
 });
 ipcMain.on("appointment:request:today", event => {
-    console.log("here2");
+    sendTodayAppointments();
 });
 ipcMain.on("appointment:done", (event, id) => {
-    console.log("here3");
+    allAppointment.forEach((appointment) => {
+        appointment.done = 1;
+    });
+
+    sendTodayAppointments();
+
 });
+
+const sendTodayAppointments = () => {
+    const today = new Date().toISOString().slice(0, 10);
+    const filtered = allAppointment.filter((appointment) => appointment.date === today);
+
+    todayWindow.webContents.send("appointment:response:today", filtered);
+};
 
 const menuTemplate = [{
         label: "file",
@@ -100,7 +123,7 @@ const menuTemplate = [{
             },
             {
                 label: "Quit",
-                accelerator: process.platfrom === "darwin" ? "Command+Q" : "CTRL + Q",
+                accelerator: process.platform === "darwin" ? "Command+Q" : "CTRL + Q",
                 click() {
                     app.quit();
                 }
